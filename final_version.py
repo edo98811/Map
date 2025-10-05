@@ -15,7 +15,6 @@ def plot_map(
     lon,
     short_side_m=5000,
     output_path="mainz_final.png",
-    palette=None,
     seed=42,
     palette_option=1
 ):

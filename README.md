@@ -27,7 +27,7 @@ Create artistic maps.
 4. Customize parameters in `main.py`:
   
   **Palette options:**  
-  Choose from several curated color palettes, each represented as an array of hexadecimal color codes:
+  Choose these color palettes:
 
   - `["#335c67", "#fff3b0", "#e09f3e", "#9e2a2b", "#540b0e"]`  
     *Earthy greens and warm browns.*
@@ -44,13 +44,13 @@ Create artistic maps.
   - `["#780000", "#c1121f", "#fdf0d5", "#003049", "#669bbc"]`  
     *Strong reds, soft cream, and cool blues.*
 
-  These palettes can be used for theming, data visualization, or UI design to provide visually appealing color combinations.
+You can customise these parameters:
 
-    - **Location**: Decide on a meaningful place (e.g., your hometown, a favorite city).
-    - **Map size**: Adjust `short_side_m` to fit your desired print size or level of detail.
-    - **Style**: Select a color palette (`palette_option`) that matches your decor or personal taste.
-    - **Reproducibility**: Set a `seed` value to ensure consistent results if you want to recreate the same map later.
-    - **Output**: Choose an `output_path` that helps you organize your generated images.
+  - **Location**: Decide on a meaningful place (e.g., your hometown, a favorite city).
+  - **Map size**: Adjust `short_side_m` to fit your desired print size or level of detail.
+  - **Style**: Select a color palette (`palette_option`) that matches your decor or personal taste.
+  - **Reproducibility**: Set a `seed` value to ensure consistent results if you want to recreate the same map later.
+  - **Output**: Choose an `output_path` that helps you organize your generated images.
 
     Example usage:
 

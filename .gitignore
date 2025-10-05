@@ -3,6 +3,18 @@
 /cache
 /old
 
+# ignore images 
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.tiff
+*.bmp
+*.svg
+
+# macOS
+.DS_Store
+
 # VSCode settings
 .vscode/
 

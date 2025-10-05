@@ -2,3 +2,44 @@
 /__pycache__
 /cache
 /old
+
+# VSCode settings
+.vscode/
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+*.env
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.coverage
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# mypy
+.mypy_cache/
+.dmypy.json
+
+# pipenv
+Pipfile.lock
+
+# virtualenv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/

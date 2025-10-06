@@ -5,18 +5,46 @@ import math
 import geopandas as gpd
 from shapely.ops import unary_union, polygonize
 import matplotlib.pyplot as plt
+import json
+import os
 
 
 def a4_rectangle(center_lat, center_lon, short_side_m, format="A4"):
     """
-    Returns a Shapely rectangle (Polygon) in WGS84 coordinates, centered at (lat, lon),
-    with the short side = short_side_m in meters. Only A4 supported.
+    Creates a Shapely Polygon representing a rectangle (A4 or square format) centered at the specified latitude and longitude.
+    The rectangle is defined in WGS84 coordinates and sized such that its short side is `short_side_m` meters long.
+    For A4 format, the long side is calculated using the A4 aspect ratio (1:√2). For square format, both sides are equal.
+    Parameters
+    ----------
+    center_lat : float
+      Latitude of the rectangle's center (in degrees, WGS84).
+    center_lon : float
+      Longitude of the rectangle's center (in degrees, WGS84).
+    short_side_m : float
+      Length of the rectangle's short side in meters.
+    format : str, optional
+      Rectangle format: "A4" (default, aspect ratio 1:√2) or "square" (aspect ratio 1:1).
+    Returns
+    -------
+    rect_wgs84 : shapely.geometry.Polygon
+      Polygon representing the rectangle in WGS84 coordinates.
+    Raises
+    ------
+    ValueError
+      If an unsupported format is specified.
+    Notes
+    -----
+    - Uses local UTM projection for accurate meter-based sizing.
+    - Only "A4" and "square" formats are currently supported.
     """
-    if format != "A4":
-        raise ValueError("Only A4 format is supported for now")
 
     # A4 ratio: short:long = 1:√2
-    long_side_m = short_side_m * math.sqrt(2)
+    if format.lower() == "a4":
+        long_side_m = short_side_m * math.sqrt(2)
+    elif format.lower() == "square":
+        long_side_m = short_side_m
+    else:
+        raise ValueError("Only A4 and square formats are supported for now")
 
     # Define local UTM projection for accurate meters
     utm_zone = int((center_lon + 180) // 6) + 1
@@ -183,18 +211,53 @@ def get_palette(palette_option=1, palette=None):
     Returns:
       list: Selected color palette.
     """
-    palettes = [
-        ["#335c67", "#fff3b0", "#e09f3e", "#9e2a2b", "#540b0e"],
-        ["#003049", "#d62828", "#f77f00", "#fcbf49", "#eae2b7"],
-        ["#386641", "#6a994e", "#a7c957", "#f2e8cf", "#bc4749"],
-        ["#5f0f40", "#9a031e", "#fb8b24", "#e36414", "#0f4c5c"],
-        ["#780000", "#c1121f", "#fdf0d5", "#003049", "#669bbc"]
-    ]
+    # palettes = {
+    #   "warm": ["#335c67", "#fff3b0", "#e09f3e", "#9e2a2b", "#540b0e"],
+    #   "sunset": ["#003049", "#d62828", "#f77f00", "#fcbf49", "#eae2b7"],
+    #   "forest": ["#386641", "#6a994e", "#a7c957", "#f2e8cf", "#bc4749"],
+    #   "vivid": ["#5f0f40", "#9a031e", "#fb8b24", "#e36414", "#0f4c5c"],
+    #   "classic": ["#780000", "#c1121f", "#fdf0d5", "#003049", "#669bbc"],
+    #   "fresh": ["#233d4d", "#fe7f2d", "#fcca46", "#a1c181", "#619b8a"],
+    #   "neon": ["#390099", "#9e0059", "#ff0054", "#ff5400", "#ffbd00"],
+    #   "vibrant_rainbow": ["#f94144", "#f3722c", "#f8961e", "#f9844a", "#f9c74f",
+    #         "#90be6d", "#43aa8b", "#4d908e", "#577590", "#277da1"],
+    #   "pastel_rainbow": ["#f94144", "#f3722c", "#f8961e", "#f9844a", "#f9c74f",
+    #                     "#90be6d", "#43aa8b", "#4d908e", "#577590", "#277da1"]
+    # }
+
+    # Load palettes from palette.json
+    palette_file = os.path.join(os.path.dirname(__file__), "palettes.json")
+    with open(palette_file, "r") as f:
+        palettes = json.load(f)
+
     if palette is None:
-        if 1 <= palette_option <= 5:
-            return palettes[palette_option - 1]
+        # Accept palette_option as either int (legacy) or str (key)
+        if isinstance(palette_option, int):
+            # If palette_option is an integer, map to palette by index (1-based)
+            keys = list(palettes.keys())
+            if 1 <= palette_option <= len(keys):
+                return palettes[keys[palette_option - 1]]
+            else:
+                # Warn and use default if out of range
+                import warnings
+                warnings.warn(
+                    "Invalid palette_option, resorting to default palette.", UserWarning)
+                return palettes["warm"]
+        elif isinstance(palette_option, str):
+            # If palette_option is a string, use as key
+            if palette_option in palettes:
+                return palettes[palette_option]
+            else:
+                # Warn and use default if key not found
+                import warnings
+                warnings.warn(
+                    "Invalid palette_option key, resorting to default palette.", UserWarning)
+                return palettes["warm"]
         else:
+            # Warn and use default for invalid type
             import warnings
-            warnings.warn("Invalid palette_option, resorting to default palette.", UserWarning)
-            return palettes[0]
+            warnings.warn(
+                "Invalid palette_option type, resorting to default palette.", UserWarning)
+            return palettes["warm"]
+    # If custom palette is provided, return it as is
     return palette

@@ -16,7 +16,9 @@ def plot_map(
     short_side_m=5000,
     output_path="mainz_final.png",
     seed=42,
-    palette_option=1
+    palette_option=1,
+    palette=None,
+    place=""
 ):
     """
     Plots a stylized map of a specified location and saves it as an image.
@@ -30,8 +32,6 @@ def plot_map(
       Length of the short side of the map rectangle in meters (default is 5000).
     output_path : str, optional
       Path to save the output image file (default is "mainz_final.png").
-    palette : list or None, optional
-      List of colors to use for buildings and land patches. If None, a palette is selected based on `palette_option`.
     seed : int, optional
       Random seed for color assignment (default is 42).
     palette_option : int, optional
@@ -48,7 +48,7 @@ def plot_map(
     - The function customizes the map's style and adds a location label.
     """
 
-    palette = get_palette(palette_option)
+    palette = get_palette(palette_option, palette)
 
     rectangle = a4_rectangle(lat, lon, short_side_m=short_side_m, format="A4")
 
@@ -61,20 +61,27 @@ def plot_map(
         "building": True,
         "highway": True,
         "railway": True,
-        "natural": True
+        "natural": True,
+        "waterway": ["river", "canal"],
+        "water": ["sea"]
     }
     gdf = ox.features.features_from_polygon(
         polygons.geometry.iloc[0], tags=tags)
 
-    buildings = gdf[gdf["building"].notna()].copy()
-    streets = gdf[gdf["highway"].notna()].copy()
-    rail = gdf[gdf["railway"].notna()].copy()
-    water = gdf[gdf["natural"].isin(["water", "river", "lake"])].copy()
+    # Safely extract tags, handling missing columns
+    buildings = gdf[gdf.get("building").notna()] if "building" in gdf.columns else gpd.GeoDataFrame(geometry=[], crs=gdf.crs)
+    streets = gdf[gdf.get("highway").notna()] if "highway" in gdf.columns else gpd.GeoDataFrame(geometry=[], crs=gdf.crs)
+    rail = gdf[gdf.get("railway").notna()] if "railway" in gdf.columns else gpd.GeoDataFrame(geometry=[], crs=gdf.crs)
+    water = gdf[(gdf.get("natural") == "water")] if "natural" in gdf.columns else gpd.GeoDataFrame(geometry=[], crs=gdf.crs)
+    waterways = gdf[gdf.get("waterway").notna()] if "waterway" in gdf.columns else gpd.GeoDataFrame(geometry=[], crs=gdf.crs)
+    sea = gdf[gdf.get("water") == "sea"] if "water" in gdf.columns else gpd.GeoDataFrame(geometry=[], crs=gdf.crs)
 
-    buildings = gpd.clip(buildings, polygons)
-    streets = gpd.clip(streets, polygons)
-    rail = gpd.clip(rail, polygons)
-    water = gpd.clip(water, polygons)
+    buildings = gpd.clip(buildings, polygons) if not buildings.empty else buildings
+    streets = gpd.clip(streets, polygons) if not streets.empty else streets
+    rail = gpd.clip(rail, polygons) if not rail.empty else rail
+    water = gpd.clip(water, polygons) if not water.empty else water
+    waterways = gpd.clip(waterways, polygons) if not waterways.empty else waterways
+    sea = gpd.clip(sea, polygons) if not sea.empty else sea
 
     land_patches = generate_land_patches(streets)
 
@@ -114,13 +121,17 @@ def plot_map(
 
     if len(water):
         water.plot(ax=ax, color="#a3c4f3", alpha=0.95, linewidth=0)
+    if len(waterways):
+        waterways.plot(ax=ax, color="#a3c4f3", alpha=0.95, linewidth=0)
+    if len(sea):
+        sea.plot(ax=ax, color="#a3c4f3", alpha=0.95, linewidth=0)
 
     ax.set_xticks([])
     ax.set_yticks([])
     for spine in ax.spines.values():
         spine.set_visible(False)
 
-    add_two_lines_text(fig, "Mainz, Germany", decimal_to_dms(
+    add_two_lines_text(fig, place, decimal_to_dms(
         lat, lon), posx=0.5, posy=0.13)
 
     plt.savefig(

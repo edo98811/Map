@@ -5,6 +5,7 @@
 
 # ignore images 
 *.png
+!example.png
 *.jpg
 *.jpeg
 *.gif

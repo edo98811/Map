@@ -57,19 +57,22 @@ You can customise these parameters:
     ```python
     from map import plot_map
 
-    # I want a map of Paris, sized for a small frame, with the blue-themed palette.
+    # I want a map of Turin with a nice pastel palette.
     plot_map(
-      lat=48.8566,
-      lon=2.3522,
-      short_side_m=3000,
-      output_path="paris_blue.png",
-      palette_option=2,  
-      seed=123
+        lat= 45.070339,
+        lon= 7.686864,
+        palette=["#f94144", "#f3722c", "#f8961e", "#f9844a", "#f9c74f",
+                  "#90be6d", "#43aa8b", "#4d908e", "#577590", "#277da1"],
+        short_side_m=5000,
+        output_path=f"torino.png",
+        seed=42,
+        place="Turin, Italy"
     )
+
     ```
 
-
+![example_output](docs/example.png)
 
 ## About
 
-I created this project to design and display artistic maps of the places I've lived, so I could hang them as unique decorations in my home.
+I created this project to design artistic maps of the places I've lived in, so I could hang them as decorations in my home.
